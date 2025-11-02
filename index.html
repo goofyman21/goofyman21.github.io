@@ -1,187 +1,158 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Google Drive Video Player — Sleek UI</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Fake Loader → Cloaked about:blank Player</title>
   <style>
-    :root {
-      --bg: #0b0b12;
-      --card: rgba(255,255,255,0.06);
-      --text: #e9e9ee;
-      --muted: #b7b7c7;
-      --accent: #7c6cff;
-      --accent-2: #27d3a6;
-      --shadow: 0 10px 30px rgba(0,0,0,.45);
-      --radius: 16px;
-      --radius-lg: 22px;
+    :root{
+      --bg:#0b0b12; --card:rgba(255,255,255,0.06); --accent:#7c6cff; --text:#e9e9ee;
     }
-
-    body {
-      margin: 0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--text);
-      background: var(--bg);
-    }
-
-    header {
-      position: fixed;
-      top: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: min(1100px, 92vw);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 14px;
-      border-radius: var(--radius);
-      background: var(--card);
-      backdrop-filter: blur(8px);
-      box-shadow: var(--shadow);
-    }
-
-    .brand {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      font-weight: 700;
-    }
-
-    .video-button {
-      appearance: none;
-      border: none;
-      cursor: pointer;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #fff;
-      padding: 12px 18px;
-      border-radius: 999px;
-      font-weight: 600;
-      box-shadow: 0 8px 20px rgba(124,108,255,.35);
-      transition: transform .15s ease, box-shadow .2s ease;
-      margin: 10px;
-    }
-
-    .video-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 28px rgba(124,108,255,.4);
-    }
-
-    .container {
-      width: min(1100px, 92vw);
-      margin: 120px auto 80px;
-      text-align: center;
-    }
-
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.65);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-
-    .modal.open {
-      display: flex;
-    }
-
-    .modal-dialog {
-      background: #0a0a0e;
-      border-radius: 18px;
-      width: min(1000px, 92vw);
-      aspect-ratio: 16 / 9;
-      position: relative;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      transform: scale(.96);
-      opacity: 0;
-      transition: transform .22s ease, opacity .22s ease;
-    }
-
-    .modal.open .modal-dialog {
-      transform: scale(1);
-      opacity: 1;
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      border: none;
-      background: rgba(0,0,0,.55);
-      color: #fff;
-      width: 40px;
-      height: 40px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-size: 20px;
-      line-height: 40px;
-      text-align: center;
-    }
-
-    .modal iframe {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border: 0;
-      background: #000;
-    }
+    body{margin:0;height:100vh;font-family:system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text);display:grid;place-items:center;}
+    .wrap{max-width:920px;width:92vw;text-align:center;padding:28px;background:var(--card);border-radius:14px;backdrop-filter:blur(8px);box-shadow:0 12px 40px rgba(0,0,0,.5);}
+    .btn {appearance:none;border:0;padding:12px 18px;border-radius:999px;background:linear-gradient(135deg,var(--accent),#27d3a6);color:#fff;font-weight:700;cursor:pointer;}
+    .btn:active{transform:translateY(1px);}
+    /* Loader overlay (full screen inside page) */
+    .loader-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,.75));z-index:9999;backdrop-filter:blur(4px);}
+    .loader-overlay.show{display:flex;}
+    .loader-card{width:min(560px,88vw);padding:26px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02));text-align:center;box-shadow:0 12px 30px rgba(0,0,0,.6);}
+    .spinner{width:56px;height:56px;border-radius:50%;border:6px solid rgba(255,255,255,.08);border-top-color:var(--accent);animation:spin 1s linear infinite;margin:0 auto 16px;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .progress{height:10px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden;margin-top:14px;}
+    .progress > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#27d3a6);transition:width .2s ease;}
+    .loader-text{color:var(--text);font-weight:600}
+    .small{font-size:13px;color:rgba(255,255,255,.75);margin-top:8px}
   </style>
 </head>
 <body>
-  <header>
-    <div class="brand">🎞️ Video Player</div>
-  </header>
+  <div class="wrap">
+    <h2>Open Cloaked Player</h2>
+    <p class="small">This will show a short 'loading' screen, then open a clean player in a new tab.</p>
 
-  <main class="container">
-    <h1>Watch Videos in a Modern Popup Player</h1>
-    <p>Click a button below to play directly without leaving this page.</p>
+    <!-- Replace these with whichever embed links you want -->
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap">
+      <button class="btn" id="open-embed-1">Open Drive Video 1</button>
+      <button class="btn" id="open-embed-2">Open Drive Video 2</button>
+    </div>
+  </div>
 
-    <button id="video-button-1" class="video-button">Watch Google Drive Video 1</button>
-    <button id="video-button-2" class="video-button">Watch Google Drive Video 2</button>
-  </main>
-
-  <div id="video-modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal-dialog">
-      <button class="modal-close" id="modal-close" aria-label="Close video">&times;</button>
-      <iframe id="video-frame" src="" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+  <!-- Fake loader shown in-page while the about:blank tab is prepared -->
+  <div id="loader" class="loader-overlay" role="status" aria-hidden="true">
+    <div class="loader-card" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <div class="loader-text" id="loader-title">Preparing player...</div>
+      <div class="small" id="loader-sub">Initializing secure view</div>
+      <div class="progress" aria-hidden="true" style="margin-top:18px;">
+        <i id="progress-bar"></i>
+      </div>
     </div>
   </div>
 
   <script>
-    const videoUrls = {
-      video1: 'https://drive.google.com/file/d/15UDzRR-O7IC4zCOnifkGfvUno_QnE2A8/preview',
-      video2: 'https://drive.google.com/file/d/14PMJdnwZrFM0Ksdb9TMxQkn-KB37Cxnn/preview'
+    // two example Google Drive preview URLs (public share required)
+    const targets = {
+      v1: 'https://drive.google.com/file/d/15UDzRR-O7IC4zCOnifkGfvUno_QnE2A8/preview',
+      v2: 'https://drive.google.com/file/d/14PMJdnwZrFM0Ksdb9TMxQkn-KB37Cxnn/preview'
     };
 
-    const btn1 = document.getElementById('video-button-1');
-    const btn2 = document.getElementById('video-button-2');
-    const modal = document.getElementById('video-modal');
-    const frame = document.getElementById('video-frame');
-    const closeBtn = document.getElementById('modal-close');
+    // openAboutBlankCloak: open about:blank immediately, show loader, then write cloaker HTML into the new tab
+    function openAboutBlankCloak(targetUrl, options = {}) {
+      // open immediately to avoid popup blockers
+      const win = window.open('about:blank', '_blank', 'noopener');
 
-    function openVideo(url) {
-      frame.src = url;
-      modal.classList.add('open');
-      modal.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
-      closeBtn.focus();
+      if (!win) {
+        alert('Popup blocked. Allow popups for this site and try again.');
+        return;
+      }
+
+      // show loader overlay
+      const loader = document.getElementById('loader');
+      const prog = document.getElementById('progress-bar');
+      const title = document.getElementById('loader-title');
+      const sub = document.getElementById('loader-sub');
+      loader.classList.add('show');
+      loader.setAttribute('aria-hidden','false');
+      title.textContent = 'Loading secure player...';
+      sub.textContent = 'This only takes a few seconds';
+
+      // animate progress bar (visual only)
+      let pct = 0;
+      const duration = options.seconds || 3; // seconds of fake "loading"
+      const steps = Math.max(12, duration * 10);
+      const stepMs = Math.floor((duration * 1000) / steps);
+      const t = setInterval(() => {
+        pct = Math.min(100, pct + (100 / steps));
+        prog.style.width = pct + '%';
+        if (pct >= 100) {
+          clearInterval(t);
+        }
+      }, stepMs);
+
+      // After the fake load, inject minimal cloaker HTML into about:blank
+      setTimeout(() => {
+        // hide loader
+        loader.classList.remove('show');
+        loader.setAttribute('aria-hidden','true');
+
+        // Build cloaker HTML string
+        const cloakerHTML = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Player</title>
+  <style>
+    :root{--bg:#000;--bar:rgba(255,255,255,.06);--accent: #7c6cff;--text:#fff}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial}
+    .bar{position:fixed;left:12px;right:12px;top:12px;height:44px;background:var(--bar);border-radius:10px;display:flex;align-items:center;gap:12px;padding:6px 12px;backdrop-filter:blur(6px);z-index:4}
+    .bar .title{font-weight:700}
+    .bar button{margin-left:auto;background:transparent;border:0;color:var(--text);cursor:pointer;padding:8px;border-radius:8px}
+    iframe{position:fixed;inset:0;border:0;width:100%;height:100%;background:#000}
+  </style>
+</head>
+<body>
+  <div class="bar" role="toolbar" aria-label="Player controls">
+    <div class="title">Secure Player</div>
+    <button onclick="toggleFullscreen()">Fullscreen</button>
+    <button onclick="window.close()">Close</button>
+  </div>
+  <iframe src="${targetUrl}"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowfullscreen
+          referrerpolicy="no-referrer"
+          sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-presentation">
+  </iframe>
+  <script>
+    function toggleFullscreen() {
+      document.documentElement.requestFullscreen?.();
+    }
+    // Optional: intercept messages from the iframe if you add postMessage logic
+  <\/script>
+</body>
+</html>`;
+
+        // write into new window
+        try {
+          win.document.open();
+          win.document.write(cloakerHTML);
+          win.document.close();
+          // focus the new tab (user agent may decide)
+          try { win.focus(); } catch(e) {}
+        } catch (err) {
+          // Some browsers or policies may prevent writing; show fallback message
+          alert('Could not prepare cloaked player. The new tab may have special security settings.');
+        }
+      }, (options.seconds || 3) * 1000);
     }
 
-    function closeVideo() {
-      modal.classList.remove('open');
-      modal.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
-      frame.src = '';
-    }
-
-    btn1.addEventListener('click', () => openVideo(videoUrls.video1));
-    btn2.addEventListener('click', () => openVideo(videoUrls.video2));
-    closeBtn.addEventListener('click', closeVideo);
-    modal.addEventListener('click', (e) => { if (e.target === modal) closeVideo(); });
-    window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('open')) closeVideo(); });
+    // Wire up buttons (user click opens about:blank immediately)
+    document.getElementById('open-embed-1').addEventListener('click', () => {
+      openAboutBlankCloak(targets.v1, { seconds: 3 });
+    });
+    document.getElementById('open-embed-2').addEventListener('click', () => {
+      openAboutBlankCloak(targets.v2, { seconds: 3 });
+    });
   </script>
 </body>
 </html>
