@@ -188,18 +188,13 @@
     <section class="card hero" aria-label="Video player section">
       <div>
         <h1 class="heading">Watch your Google Drive videos in a beautiful, modern player.</h1>
-        <p class="subheading">Clean design. Minimal chrome. No page redirects. Pop open a responsive, distraction‑free modal player and enjoy.</p>
+        <p class="subheading">Clean design. Minimal chrome. No page redirects. Pop open a responsive, distraction‑free modal player and enjoy.</p>$1
 
-        <div class="btn-row">
-          <button class="pill-btn" id="video-button-1" aria-label="Watch Video 1">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            Watch Video 1
-          </button>
-          <button class="pill-btn ghost-btn" id="video-button-2" aria-label="Watch Video 2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            Watch Video 2
-          </button>
-        </div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="pill-btn ghost-btn" id="game-button" aria-label="Play Game" title="Open game in a sleek new tab">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 8a4 4 0 0 0-4 4v2.5A3.5 3.5 0 0 0 5.5 18h1.1a2 2 0 0 0 1.8-1.1l.7-1.4A2 2 0 0 1 12 14a2 2 0 0 1 1.9 1.5l.7 1.4A2 2 0 0 0 16.4 18h1.1A3.5 3.5 0 0 0 21 14.5V12a4 4 0 0 0-4-4H6zm0 2h12a2 2 0 0 1 2 2v2.5A1.5 1.5 0 0 1 18.5 16H18a.5.5 0 0 1-.45-.28l-.85-1.7A4 4 0 0 0 12 12a4 4 0 0 0-3.7 2.32l-.85 1.7A.5.5 0 0 1 7 16h-.5A1.5 1.5 0 0 1 5 14.5V12a2 2 0 0 1 1-1.73zM8.5 10.5A1.5 1.5 0 1 0 8.5 7a1.5 1.5 0 0 0 0 3.5zM16 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-8.5 3.5H9v1.5H7.5V16H6v-1.5H4.5V13H6v-1.5z"/></svg>
+          Play Game
+        </button>
       </div>
 
       <div class="preview" aria-hidden="true">
@@ -252,11 +247,46 @@
       modal.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
       frame.src = '';
-    }
+    }$1
+    const gameBtn = document.getElementById('game-button');
 
-    // Button handlers
-    btn1.addEventListener('click', () => openVideo(videoUrls.video1));
-    btn2.addEventListener('click', () => openVideo(videoUrls.video2));
+    // Open game in a styled about:blank cloaker (new tab)
+    const GAME_URL = 'https://jordanshorseracing.com.ar.readysettrot.net.au/';
+
+    function openCloakedUI(targetUrl, title = 'Game') {
+      const win = window.open('about:blank', '_blank');
+      if (!win) { alert('Popup blocked. Enable popups and try again.'); return; }
+
+      const html = `<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer"><title>${title}</title>
+<style>
+:root{--bg:#0b0b12;--text:#e9e9ee;--muted:#b7b7c7;--card:rgba(255,255,255,.06);
+--accent:#7c6cff;--accent2:#27d3a6;--shadow:0 10px 30px rgba(0,0,0,.45);--radius:14px}
+*{box-sizing:border-box}html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
+.bg{position:fixed;inset:-20% -10% -10% -10%;z-index:-1;filter:blur(60px);opacity:.85;
+background:radial-gradient(40% 40% at 20% 20%,rgba(124,108,255,.6),transparent 60%),
+           radial-gradient(35% 35% at 80% 30%,rgba(39,211,166,.4),transparent 60%),
+           radial-gradient(45% 45% at 50% 80%,rgba(255,98,146,.28),transparent 60%)}
+.bar{position:fixed;left:12px;right:12px;top:12px;height:56px;display:flex;align-items:center;gap:10px;
+background:var(--card);backdrop-filter:blur(8px);border-radius:12px;padding:8px 10px;box-shadow:var(--shadow);z-index:3}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px}
+.logo{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 6px 18px rgba(124,108,255,.35)}
+.logo svg{width:18px;height:18px;fill:#fff}.spacer{flex:1}
+.btn{appearance:none;border:0;cursor:pointer;color:var(--text);font-weight:600;background:rgba(255,255,255,.12);padding:10px 12px;border-radius:10px}
+.btn:hover{background:rgba(255,255,255,.2)}.btn.primary{color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 8px 20px rgba(124,108,255,.35)}
+.btn.primary:hover{box-shadow:0 12px 28px rgba(124,108,255,.45)}
+.stage{position:fixed;inset:0;display:grid;place-items:center;padding:84px 12px 12px}
+.frame-wrap{width:min(1200px,100%);aspect-ratio:16/9;background:#000;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);position:relative}
+iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+.fallback{position:absolute;inset:auto 12px 12px 12px;background:var(--card);backdrop-filter:blur(8px);border-radius:10px;padding:10px 12px;color:var(--muted);font-size:13px}
+</style></head>
+<body>
+  <div class="bg"></div>
+  <div class="bar" role="toolbar" aria-label="Game controls">
+    <div class="brand"><div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H9l1.5 2H17A2.5 2.5 0 0 1 19.5 8.5v1.25l-2 .75V8.5A.5.5 0 0 0 17 8h-6.5l-1.5-2H6.5a.5.5 0 0 0-.5.5V
 
     // Close interactions
     closeBtn.addEventListener('click', closeVideo);
@@ -267,6 +297,9 @@
     document.getElementById('about-btn')?.addEventListener('click', () => {
       alert('Sleek modal player for Google Drive embeds.\n\n• Glassy buttons and header\n• Animated gradient BG\n• Responsive 16:9 player\n• Esc/click-to-close');
     });
+  
+    // Optional: also allow middle-click/ctrl-click on the game button
+    try { document.getElementById('game-button').addEventListener('auxclick', (e) => { if (e.button === 1) openCloakedUI('https://jordanshorseracing.com.ar.readysettrot.net.au/', 'Horse Racing Game'); }); } catch {}
   </script>
 </body>
 </html>
