@@ -2,102 +2,245 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Internet Archive Video Player (Modal)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Internet Archive Video Player — Sleek UI</title>
   <style>
-    /* --- Base layout --- */
-    body { margin: 0; padding: 0; font-family: system-ui, Arial, sans-serif; }
-    .video-button {
-      position: fixed;
-      padding: 10px 14px;
-      background-color: #ccc;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      box-shadow: 0 2px 6px rgba(0,0,0,.15);
+    /* =========================
+       THEME VARIABLES
+    ========================== */
+    :root {
+      --bg: #0b0b12;
+      --card: rgba(255,255,255,0.06);
+      --text: #e9e9ee;
+      --muted: #b7b7c7;
+      --accent: #7c6cff;       /* primary accent */
+      --accent-2: #27d3a6;     /* secondary accent */
+      --shadow: 0 10px 30px rgba(0,0,0,.45);
+      --radius: 16px;
+      --radius-lg: 22px;
     }
-    .video-button:focus { outline: 2px solid #333; outline-offset: 2px; }
 
-    #video-button-1 { top: 10px; right: 10px; }
-    #video-button-2 { top: 10px; right: 140px; }
-
-    /* --- Modal overlay --- */
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.6);
-      display: none;              /* hidden by default */
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f7f8fb;
+        --card: rgba(0,0,0,0.05);
+        --text: #16161a;
+        --muted: #3a3a44;
+        --accent: #5a48ff;
+        --accent-2: #00b894;
+        --shadow: 0 10px 30px rgba(0,0,0,.1);
+      }
     }
+
+    /* =========================
+       GLOBAL BASE
+    ========================== */
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+      color: var(--text); background: var(--bg); overflow-x: hidden;
+    }
+
+    /* Gradient background with subtle motion */
+    .bg-wrap { position: fixed; inset: 0; z-index: -1; }
+    .bg {
+      position: absolute; inset: -20% -10% -10% -10%; filter: blur(60px); opacity: .8;
+      background: radial-gradient(40% 40% at 20% 20%, rgba(124,108,255,.6) 0%, rgba(124,108,255,0) 60%),
+                  radial-gradient(35% 35% at 80% 30%, rgba(39,211,166,.4) 0%, rgba(39,211,166,0) 60%),
+                  radial-gradient(45% 45% at 50% 80%, rgba(255,98,146,.28) 0%, rgba(255,98,146,0) 60%);
+      animation: floaty 24s ease-in-out infinite;
+    }
+
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-3%) scale(1.02); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .bg { animation: none; }
+    }
+
+    /* =========================
+       HEADER
+    ========================== */
+    header {
+      position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+      width: min(1100px, 92vw);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; border-radius: var(--radius);
+      background: var(--card); backdrop-filter: blur(8px); box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex; gap: 12px; align-items: center; font-weight: 700; letter-spacing: .3px;
+    }
+
+    .brand .logo {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 6px 18px rgba(124,108,255,.35);
+    }
+
+    .brand .logo svg { width: 22px; height: 22px; fill: white; }
+
+    .actions { display: flex; gap: 10px; align-items: center; }
+
+    .theme-toggle, .cta {
+      appearance: none; border: 0; cursor: pointer; color: var(--text);
+      background: var(--card); border-radius: 999px; padding: 10px 14px; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 8px; transition: transform .15s ease, background .2s ease;
+      backdrop-filter: blur(8px); box-shadow: var(--shadow);
+    }
+    .theme-toggle:hover, .cta:hover { transform: translateY(-1px); }
+
+    .cta { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; box-shadow: 0 8px 20px rgba(124,108,255,.35); }
+
+    /* =========================
+       HERO / CONTENT CARD
+    ========================== */
+    .container { width: min(1100px, 92vw); margin: 120px auto 80px; }
+
+    .card {
+      background: var(--card); backdrop-filter: blur(14px); border-radius: var(--radius-lg); box-shadow: var(--shadow);
+      padding: clamp(20px, 4vw, 40px);
+    }
+
+    .hero {
+      display: grid; grid-template-columns: 1.2fr .8fr; gap: clamp(20px, 4vw, 36px);
+    }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+    }
+
+    .heading { font-size: clamp(28px, 5vw, 40px); line-height: 1.1; margin: 0 0 12px; }
+    .subheading { color: var(--muted); margin: 0 0 24px; font-size: clamp(14px, 2.2vw, 18px); }
+
+    .btn-row { display: flex; flex-wrap: wrap; gap: 12px; }
+
+    .pill-btn {
+      appearance: none; border: 0; cursor: pointer; color: #fff; font-weight: 700; letter-spacing: .2px;
+      padding: 12px 16px; border-radius: 999px; display: inline-flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 10px 22px rgba(124,108,255,.35);
+      transition: transform .15s ease, box-shadow .2s ease; will-change: transform;
+    }
+    .pill-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(124,108,255,.4); }
+    .pill-btn:focus { outline: 2px solid rgba(255,255,255,.7); outline-offset: 2px; }
+
+    .ghost-btn {
+      background: transparent; border: 1.5px solid rgba(255,255,255,.28); color: var(--text);
+      box-shadow: none;
+    }
+
+    .preview {
+      border-radius: var(--radius); background: rgba(0,0,0,.35); position: relative; overflow: hidden; min-height: 220px;
+      display: grid; place-items: center;
+    }
+
+    .preview::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: radial-gradient(60% 60% at 50% 45%, rgba(124,108,255,.2), transparent 60%);
+    }
+
+    .preview .placeholder {
+      display: grid; place-items: center; text-align: center; padding: 20px; color: #e9e9ee;
+      opacity: .9; font-weight: 700; letter-spacing: .2px;
+    }
+
+    .preview .placeholder svg { width: 60px; height: 60px; margin-bottom: 12px; opacity: .9; }
+
+    /* =========================
+       MODAL PLAYER
+    ========================== */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,.65); display: none; align-items: center; justify-content: center; z-index: 9999; }
     .modal.open { display: flex; }
 
-    /* --- Modal dialog box --- */
-    .modal-dialog {
-      background: #111;           /* dark frame around the player */
-      border-radius: 12px;
-      width: min(90vw, 1000px);
-      aspect-ratio: 16 / 9;       /* keep video shape responsive */
-      position: relative;
-      box-shadow: 0 10px 30px rgba(0,0,0,.4);
-      overflow: hidden;
-    }
+    .modal-dialog { background: #0a0a0e; border-radius: 18px; width: min(1000px, 92vw); aspect-ratio: 16 / 9; position: relative; box-shadow: var(--shadow); overflow: hidden; transform: scale(.96); opacity: 0; transition: transform .22s ease, opacity .22s ease; }
+    .modal.open .modal-dialog { transform: scale(1); opacity: 1; }
 
-    /* --- Close button --- */
-    .modal-close {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      border: none;
-      background: rgba(0,0,0,.65);
-      color: #fff;
-      width: 36px;
-      height: 36px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-size: 18px;
-      line-height: 36px;
-      text-align: center;
-    }
-    .modal-close:hover { background: rgba(0,0,0,.8); }
-    .modal-close:focus { outline: 2px solid #fff; outline-offset: 2px; }
+    .modal-close { position: absolute; top: 10px; right: 10px; border: none; background: rgba(0,0,0,.55); color: #fff; width: 40px; height: 40px; border-radius: 999px; cursor: pointer; font-size: 20px; line-height: 40px; text-align: center; }
+    .modal-close:hover { background: rgba(0,0,0,.75); }
 
-    /* --- The iframe fills the dialog --- */
-    .modal iframe {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border: 0;
-      background: #000;
-    }
+    .modal iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; }
 
-    /* Prevent body scroll when modal is open */
-    body.modal-open { overflow: hidden; }
+    /* =========================
+       FOOTER
+    ========================== */
+    footer { text-align: center; color: var(--muted); margin: 30px 0 60px; font-size: 14px; }
+    footer a { color: #fff; opacity: .85; text-decoration: none; border-bottom: 1px dashed rgba(255,255,255,.35); }
+
   </style>
 </head>
 <body>
-  <button id="video-button-1" class="video-button">Watch Video 1</button>
-  <button id="video-button-2" class="video-button">Watch Video 2</button>
+  <!-- Soft animated background -->
+  <div class="bg-wrap"><div class="bg"></div></div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand" aria-label="Site branding">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H9l1.5 2H17A2.5 2.5 0 0 1 19.5 8.5v1.25l-2 .75V8.5A.5.5 0 0 0 17 8h-6.5l-1.5-2H6.5a.5.5 0 0 0-.5.5V17a.5.5 0 0 0 .5.5H11l2 2H6.5A2.5 2.5 0 0 1 4 17V6.5z"/><path d="M9.5 12.75v-1.5l7.25-3a1 1 0 0 1 1.25.95v6.6a1 1 0 0 1-1.25.95l-7.25-3z"/></svg>
+      </div>
+      <div>Archive Player</div>
+    </div>
+
+    <div class="actions">
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+        <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.8 1.42-1.42zm10.48 0l1.79-1.8 1.41 1.41-1.8 1.79-1.4-1.4zM12 4V1h-0v3h0zm0 19v-3h0v3h0zM4 13H1v-0h3v0zm19 0h-3v0h3v0zM6.76 19.16l-1.42 1.42-1.79-1.8 1.41-1.41 1.8 1.79zm12.69-.38l1.8 1.79-1.41 1.41-1.79-1.8 1.4-1.4zM12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+        <span>Theme</span>
+      </button>
+      <button class="cta" id="about-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1010 10A10.011 10.011 0 0012 2zm0 15a1.25 1.25 0 111.25-1.25A1.25 1.25 0 0112 17zm1.5-5.5a.5.5 0 01-.5.5h-1v3a1 1 0 01-2 0v-3a2 2 0 012-2h1a1 1 0 010 2z"/></svg>
+        <span>About</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <section class="card hero" aria-label="Video player section">
+      <div>
+        <h1 class="heading">Watch Internet Archive videos in a beautiful, modern player.</h1>
+        <p class="subheading">Clean design. Minimal chrome. No page redirects. Pop open a responsive, distraction‑free modal player and enjoy.</p>
+
+        <div class="btn-row">
+          <button class="pill-btn" id="video-button-1" aria-label="Watch Video 1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            Watch Video 1
+          </button>
+          <button class="pill-btn ghost-btn" id="video-button-2" aria-label="Watch Video 2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            Watch Video 2
+          </button>
+        </div>
+      </div>
+
+      <div class="preview" aria-hidden="true">
+        <div class="placeholder">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21 3H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7l-2 2h8l-2-2h7a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm-5.36 9.65-5.5 3.18A1 1 0 0 1 9 14.93V8.82a1 1 0 0 1 1.5-.86l5.5 3.18a1 1 0 0 1 .64.91 1 1 0 0 1-.5.9Z"/></svg>
+          <div>Click a button to open the player</div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Built for Internet Archive embeds. <a href="https://archive.org/" target="_blank" rel="noreferrer noopener">Explore more</a>.
+    </footer>
+  </main>
 
   <!-- Modal -->
   <div id="video-modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Video player">
     <div class="modal-dialog">
       <button class="modal-close" id="modal-close" aria-label="Close video">&times;</button>
-      <!-- The video gets injected here -->
-      <iframe id="video-frame"
-              src=""
-              allow="autoplay; fullscreen; picture-in-picture"
-              allowfullscreen
-              referrerpolicy="strict-origin-when-cross-origin">
-      </iframe>
+      <iframe id="video-frame" src="" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
     </div>
   </div>
 
   <script>
-    // Your video sources
+    // Video sources
     const videoUrls = {
       video1: 'https://archive.org/embed/video-123802',
       video2: 'https://archive.org/embed/kung.-fu.-panda.-4.2024.2160p.-web.h-265-ethel'
@@ -112,12 +255,10 @@
 
     // Open modal with selected video
     function openVideo(url) {
-      // OPTIONAL: add '?autoplay=1' if you want it to start automatically
-      frame.src = url; // + '?autoplay=1';
+      frame.src = url; // + '?autoplay=1' to force autoplay (may be blocked)
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
-      document.body.classList.add('modal-open');
-      // move focus to close button for accessibility
+      document.body.style.overflow = 'hidden';
       closeBtn.focus();
     }
 
@@ -125,27 +266,49 @@
     function closeVideo() {
       modal.classList.remove('open');
       modal.setAttribute('aria-hidden', 'true');
-      document.body.classList.remove('modal-open');
-      // Clear src to stop audio when hidden
+      document.body.style.overflow = '';
       frame.src = '';
     }
 
-    // Button handlers
+    // Event handlers
     btn1.addEventListener('click', () => openVideo(videoUrls.video1));
     btn2.addEventListener('click', () => openVideo(videoUrls.video2));
-
-    // Close interactions
     closeBtn.addEventListener('click', closeVideo);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeVideo(); });
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('open')) closeVideo(); });
 
-    // Click outside the dialog closes the modal
-    modal.addEventListener('click', (e) => {
-      // Only if clicking the backdrop (not the dialog itself)
-      if (e.target === modal) closeVideo();
+    // ===== Simple theme toggle (light/dark sync) =====
+    const themeBtn = document.getElementById('theme-toggle');
+    themeBtn?.addEventListener('click', () => {
+      // Flip a lightweight data attribute on the <html> and adjust CSS vars
+      const html = document.documentElement;
+      const lightNow = html.dataset.theme === 'light';
+      html.dataset.theme = lightNow ? 'dark' : 'light';
+
+      if (!lightNow) {
+        // Force light palette quickly by overriding vars
+        html.style.setProperty('--bg', '#f7f8fb');
+        html.style.setProperty('--card', 'rgba(0,0,0,0.05)');
+        html.style.setProperty('--text', '#16161a');
+        html.style.setProperty('--muted', '#3a3a44');
+        html.style.setProperty('--accent', '#5a48ff');
+        html.style.setProperty('--accent-2', '#00b894');
+        html.style.setProperty('--shadow', '0 10px 30px rgba(0,0,0,.1)');
+      } else {
+        // Back to dark
+        html.style.setProperty('--bg', '#0b0b12');
+        html.style.setProperty('--card', 'rgba(255,255,255,0.06)');
+        html.style.setProperty('--text', '#e9e9ee');
+        html.style.setProperty('--muted', '#b7b7c7');
+        html.style.setProperty('--accent', '#7c6cff');
+        html.style.setProperty('--accent-2', '#27d3a6');
+        html.style.setProperty('--shadow', '0 10px 30px rgba(0,0,0,.45)');
+      }
     });
 
-    // Esc key closes the modal
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modal.classList.contains('open')) closeVideo();
+    // Optional: About alert
+    document.getElementById('about-btn')?.addEventListener('click', () => {
+      alert('This is a polished front-end shell for playing Internet Archive embeds in a modal.\n\n• Clean gradient background\n• Glassy cards and buttons\n• Light/Dark theme toggle\n• Responsive 16:9 player with ESC/click-to-close');
     });
   </script>
 </body>
