@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Internet Archive & Google Drive Video Player — Sleek UI</title>
+  <title>Google Drive Video Player — Sleek UI</title>
   <style>
     :root {
       --bg: #0b0b12;
@@ -135,11 +135,10 @@
   </header>
 
   <main class="container">
-    <h1>Watch Videos in a Modern Popup Player</h1>
-    <p>Click any button below to play directly without leaving this page.</p>
+    <h1>Watch Video in a Modern Popup Player</h1>
+    <p>Click the button below to play directly without leaving this page.</p>
 
-    <button id="video-button-1" class="video-button">Watch Google Drive Video</button>
-    <button id="video-button-2" class="video-button">Watch Internet Archive Video</button>
+    <button id="video-button-2" class="video-button">Watch Google Drive Video</button>
   </main>
 
   <div id="video-modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
@@ -150,15 +149,9 @@
   </div>
 
   <script>
-    const videoUrls = {
-      // Google Drive embed link
-      video1: 'https://drive.google.com/file/d/15UDzRR-O7IC4zCOnifkGfvUno_QnE2A8/preview',
-      // Internet Archive sample
-      video2: 'https://archive.org/embed/video-123802'
-    };
+    const videoUrl = 'https://drive.google.com/file/d/15UDzRR-O7IC4zCOnifkGfvUno_QnE2A8/preview';
 
-    const btn1 = document.getElementById('video-button-1');
-    const btn2 = document.getElementById('video-button-2');
+    const btn = document.getElementById('video-button-2');
     const modal = document.getElementById('video-modal');
     const frame = document.getElementById('video-frame');
     const closeBtn = document.getElementById('modal-close');
@@ -178,8 +171,7 @@
       frame.src = '';
     }
 
-    btn1.addEventListener('click', () => openVideo(videoUrls.video1));
-    btn2.addEventListener('click', () => openVideo(videoUrls.video2));
+    btn.addEventListener('click', () => openVideo(videoUrl));
     closeBtn.addEventListener('click', closeVideo);
     modal.addEventListener('click', (e) => { if (e.target === modal) closeVideo(); });
     window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('open')) closeVideo(); });
