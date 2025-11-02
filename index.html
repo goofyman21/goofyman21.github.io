@@ -1,90 +1,130 @@
+<!-- Your buttons -->
 <button class="btn" id="open-embed-1">Open Drive Video 1</button>
 <button class="btn" id="open-embed-2">Open Drive Video 2</button>
 
 <script>
+  // Your Google Drive preview URLs (must be shared “Anyone with the link – Viewer”)
   const targets = {
     v1: 'https://drive.google.com/file/d/15UDzRR-O7IC4zCOnifkGfvUno_QnE2A8/preview',
     v2: 'https://drive.google.com/file/d/14PMJdnwZrFM0Ksdb9TMxQkn-KB37Cxnn/preview'
   };
 
-  function openCloakedWithDelay(targetUrl, delayMs = 3000) {
-    // 1) Open new tab immediately (no 'noopener' so we can write to it)
+  function openCloakedUI(targetUrl, title = 'Secure Player') {
+    // open new tab immediately so the browser lets us write into it
     const win = window.open('about:blank', '_blank');
     if (!win) {
-      alert('Popup blocked. Allow popups and try again.');
+      alert('Popup blocked. Allow popups for this site and try again.');
       return;
     }
 
-    // 2) Immediately write a loader page that will self-start the timer
+    // full UI (no loader) written directly into the about:blank tab
     const html = `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Player</title>
+  <title>${title}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="referrer" content="no-referrer">
   <style>
-    :root{--bg:#0b0b12;--text:#e9e9ee;--chrome:rgba(255,255,255,.06)}
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);
-      font-family:system-ui,Segoe UI,Roboto,Arial}
-    .bar{position:fixed;inset:12px 12px auto;display:flex;gap:8px;align-items:center;
-      background:var(--chrome);backdrop-filter:blur(6px);border-radius:12px;padding:8px 12px;z-index:2}
-    .bar .title{font-weight:700}
-    .bar button{all:unset;cursor:pointer;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.12)}
-    .bar button:hover{background:rgba(255,255,255,.2)}
-    .stage{position:fixed;inset:0;display:grid;place-items:center}
-    .loader{display:grid;gap:12px;place-items:center;text-align:center}
-    .spinner{width:56px;height:56px;border-radius:50%;border:6px solid rgba(255,255,255,.1);
-      border-top-color:#7c6cff;animation:spin 1s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#000;display:none}
+    :root{
+      --bg:#0b0b12;
+      --text:#e9e9ee;
+      --muted:#b7b7c7;
+      --card:rgba(255,255,255,0.06);
+      --accent:#7c6cff;
+      --accent2:#27d3a6;
+      --shadow:0 10px 30px rgba(0,0,0,.45);
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    /* Soft gradient background */
+    .bg{position:fixed;inset:-20% -10% -10% -10%;z-index:-1;filter:blur(60px);opacity:.85;
+      background:
+        radial-gradient(40% 40% at 20% 20%, rgba(124,108,255,.6) 0%, rgba(124,108,255,0) 60%),
+        radial-gradient(35% 35% at 80% 30%, rgba(39,211,166,.4) 0%, rgba(39,211,166,0) 60%),
+        radial-gradient(45% 45% at 50% 80%, rgba(255,98,146,.28) 0%, rgba(255,98,146,0) 60%);
+    }
+
+    /* Glassy top bar */
+    .bar{
+      position:fixed; left:12px; right:12px; top:12px; height:56px;
+      display:flex; align-items:center; gap:10px;
+      background:var(--card); backdrop-filter:blur(8px);
+      border-radius:12px; padding:8px 10px; box-shadow:var(--shadow); z-index:3;
+    }
+    .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px}
+    .logo{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--accent),var(--accent2)); box-shadow:0 6px 18px rgba(124,108,255,.35)}
+    .logo svg{width:18px;height:18px;fill:#fff}
+    .spacer{flex:1}
+    .btn{
+      appearance:none; border:0; cursor:pointer; color:var(--text); font-weight:600;
+      background:rgba(255,255,255,.12); padding:10px 12px; border-radius:10px;
+    }
+    .btn:hover{background:rgba(255,255,255,.2)}
+    .btn.primary{color:#fff; background:linear-gradient(135deg,var(--accent),var(--accent2)); box-shadow:0 8px 20px rgba(124,108,255,.35)}
+    .btn.primary:hover{box-shadow:0 12px 28px rgba(124,108,255,.45)}
+
+    /* Player stage */
+    .stage{position:fixed; inset:0; display:grid; place-items:center; padding:84px 12px 12px}
+    .frame-wrap{
+      width:min(1100px, 100%); aspect-ratio:16/9; background:#000; border-radius:var(--radius);
+      overflow:hidden; box-shadow:var(--shadow); position:relative;
+    }
+    iframe{position:absolute; inset:0; width:100%; height:100%; border:0; background:#000}
+    .hint{position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
+      padding:8px 12px; background:var(--card); backdrop-filter:blur(8px);
+      border-radius:10px; color:var(--muted); font-size:13px}
+    @media (max-width: 640px){
+      .hint{display:none}
+    }
   </style>
 </head>
 <body>
+  <div class="bg"></div>
+
   <div class="bar" role="toolbar" aria-label="Player controls">
-    <div class="title">Secure Player</div>
-    <button onclick="document.documentElement.requestFullscreen?.()">Fullscreen</button>
-    <button onclick="window.close()">Close</button>
-  </div>
-
-  <div class="stage">
-    <div id="loader" class="loader" role="status" aria-live="polite">
-      <div class="spinner" aria-hidden="true"></div>
-      <div>Preparing player…</div>
-      <small>This only takes a few seconds</small>
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H9l1.5 2H17A2.5 2.5 0 0 1 19.5 8.5v1.25l-2 .75V8.5A.5.5 0 0 0 17 8h-6.5l-1.5-2H6.5a.5.5 0 0 0-.5.5V17a.5.5 0 0 0 .5.5H11l2 2H6.5A2.5 2.5 0 0 1 4 17V6.5z"/><path d="M9.5 12.75v-1.5l7.25-3a1 1 0 0 1 1.25.95v6.6a1 1 0 0 1-1.25.95l-7.25-3z"/></svg>
+      </div>
+      <div>${title}</div>
     </div>
-    <iframe id="player"
-      allow="autoplay; fullscreen; picture-in-picture"
-      allowfullscreen
-      referrerpolicy="no-referrer"
-      sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-presentation">
-    </iframe>
+    <div class="spacer"></div>
+    <button class="btn" onclick="history.back()">Back</button>
+    <button class="btn" onclick="document.documentElement.requestFullscreen?.()">Fullscreen</button>
+    <button class="btn primary" onclick="window.close()">Close</button>
   </div>
 
-  <script>
-    const TARGET = ${JSON.stringify(targetUrl)};
-    const DELAY = ${Number.isFinite(delayMs) ? delayMs : 3000};
-    const frame = document.getElementById('player');
-    const loader = document.getElementById('loader');
+  <div class="stage" aria-label="Video player">
+    <div class="frame-wrap">
+      <iframe
+        src="${targetUrl}"
+        allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+        allowfullscreen
+        referrerpolicy="no-referrer"
+        sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-presentation">
+      </iframe>
+    </div>
+  </div>
 
-    setTimeout(() => {
-      frame.src = TARGET;             // 3) load the actual embed after delay
-      frame.style.display = 'block';
-      loader.style.display = 'none';
-    }, DELAY);
-  <\/script>
+  <div class="hint">Tip: Use the Fullscreen button for the best view.</div>
 </body>
 </html>`;
 
+    // write the page now (no delay, no loader)
     win.document.open();
     win.document.write(html);
     win.document.close();
+    try { win.focus(); } catch (e) {}
   }
 
+  // wire up your buttons
   document.getElementById('open-embed-1').addEventListener('click', () => {
-    openCloakedWithDelay(targets.v1, 3000); // 3s fake load
+    openCloakedUI(targets.v1, 'Drive Video 1');
   });
   document.getElementById('open-embed-2').addEventListener('click', () => {
-    openCloakedWithDelay(targets.v2, 3000);
+    openCloakedUI(targets.v2, 'Drive Video 2');
   });
 </script>
